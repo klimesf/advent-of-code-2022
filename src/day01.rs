@@ -32,5 +32,5 @@ fn part_b(elves: &mut BinaryHeap<i32>) {
     let max2 = elves.pop().unwrap();
     let max3 = elves.pop().unwrap();
 
-    println!("{} + {} + {} = {}", max1, max2, max3, max1 + max2 + max3)
+    println!("{}", max1 + max2 + max3)
 }
