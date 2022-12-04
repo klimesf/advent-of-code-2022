@@ -6,11 +6,13 @@ extern crate regex;
 use crate::day01::day01;
 use crate::day02::day02;
 use crate::day03::day03;
+use crate::day04::day04;
 
 mod io;
 mod day01;
 mod day02;
 mod day03;
+mod day04;
 
 fn main() {
     println!();
@@ -26,4 +28,7 @@ fn main() {
 
     println!("--- day03:");
     day03();
+
+    println!("--- day04:");
+    day04();
 }
