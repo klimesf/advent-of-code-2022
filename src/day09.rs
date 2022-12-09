@@ -18,7 +18,7 @@ fn part_a() {
         let dir = parts.0;
         let amount: i32 = parts.1.parse().unwrap();
 
-        for i in 0..amount {
+        for _ in 0..amount {
             match dir {
                 "R" => {
                     head_pos.0 += 1;
@@ -94,7 +94,7 @@ fn part_b() {
         let dir = parts.0;
         let amount: i32 = parts.1.parse().unwrap();
 
-        for i in 0..amount {
+        for _ in 0..amount {
             match dir {
                 "R" => {
                     positions[0].0 += 1;

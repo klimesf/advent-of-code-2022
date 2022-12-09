@@ -17,7 +17,7 @@ pub(crate) fn day08() {
     part_b(trees.clone());
 }
 
-fn part_a(mut trees: Vec<Vec<i32>>) {
+fn part_a(trees: Vec<Vec<i32>>) {
     let mut visible: HashSet<(i32, i32)> = HashSet::new();
     // Rows from left
     for x in 0..trees.len() {
@@ -62,40 +62,40 @@ fn part_a(mut trees: Vec<Vec<i32>>) {
     println!("{}", visible.len());
 }
 
-fn part_b(mut trees: Vec<Vec<i32>>) {
+fn part_b(trees: Vec<Vec<i32>>) {
     let mut max_viewing_score = 0;
     for x in 1..(trees.len() - 1) {
         for y in 1..(trees.len() - 1) {
             let max = trees[x][y];
 
             let mut bottom = 1;
-            'inner: for x1 in (x + 1)..(trees.len() - 1) {
+            'inner1: for x1 in (x + 1)..(trees.len() - 1) {
                 if trees[x1][y] >= max {
-                    break 'inner;
+                    break 'inner1;
                 }
                 bottom += 1;
             }
 
             let mut up = 1;
-            'inner: for x2 in (1..=(x - 1)).rev() {
+            'inner2: for x2 in (1..=(x - 1)).rev() {
                 if trees[x2][y] >= max {
-                    break 'inner;
+                    break 'inner2;
                 }
                 up += 1;
             }
 
             let mut right = 1;
-            'inner: for y1 in (y + 1)..(trees.len() - 1) {
+            'inner3: for y1 in (y + 1)..(trees.len() - 1) {
                 if trees[x][y1] >= max {
-                    break 'inner;
+                    break 'inner3;
                 }
                 right += 1;
             }
 
             let mut left = 1;
-            'inner: for y2 in (1..=(y - 1)).rev() {
+            'inner4: for y2 in (1..=(y - 1)).rev() {
                 if trees[x][y2] >= max {
-                    break 'inner;
+                    break 'inner4;
                 }
                 left += 1;
             }
