@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use crate::toolbox::lcm_64;
 
 pub(crate) fn day11() {
     part_a();
@@ -38,10 +37,8 @@ fn part_a() {
 fn part_b() {
     let mut monkeys = load_input();
     let mut buffer: HashMap<usize, Vec<i64>> = HashMap::new();
-    let mut lcm = monkeys[0].test;
-    for i in 1..monkeys.len() {
-        lcm = lcm_64(lcm, monkeys[i].test);
-    }
+    let mut lcm: i64 = 1;
+    for monkey in &monkeys { lcm *= monkey.test; }
 
     for _ in 0..10000 {
         for i in 0..monkeys.len() {
