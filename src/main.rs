@@ -15,6 +15,7 @@ use crate::day09::day09;
 use crate::day10::day10;
 use crate::day11::day11;
 use crate::day12::day12;
+use crate::day13::day13;
 
 mod io;
 mod day01;
@@ -29,6 +30,7 @@ mod day09;
 mod day10;
 mod day11;
 mod day12;
+mod day13;
 mod toolbox;
 
 fn main() {
@@ -72,4 +74,7 @@ fn main() {
 
     println!("--- day12:");
     day12();
+
+    println!("--- day13:");
+    day13();
 }

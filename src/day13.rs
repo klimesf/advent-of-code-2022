@@ -5,6 +5,7 @@ use itertools::Itertools;
 pub(crate) fn day13() {
     let input = fs::read_to_string("input/day13/input.txt").unwrap();
     part_a(input.trim());
+    part_b(input.trim());
 }
 
 fn part_a(input: &str) {
@@ -17,11 +18,22 @@ fn part_a(input: &str) {
     println!("{}", ans);
 }
 
+fn part_b(input: &str) {
+    let ans: usize = input.split("\n").into_iter()
+        .filter(|s| !s.is_empty())
+        .chain(vec!("[[2]]", "[[6]]"))
+        .map(|s| ListTree::new(s))
+        .sorted()
+        .enumerate()
+        .filter(|(_, x)| x.print() == "[[2]]" || x.print() == "[[6]]")
+        .map(|(i, _)| i + 1)
+        .product();
+    println!("{}", ans);
+}
+
 fn is_ordered(first: &str, second: &str) -> bool {
     let first_tree = ListTree::new(first);
     let second_tree = ListTree::new(second);
-    println!("{}", first_tree.print());
-    println!("{}", second_tree.print());
     first_tree.cmp(&second_tree) != Ordering::Greater
 }
 
@@ -35,6 +47,7 @@ impl ListTree {
     fn new(s: &str) -> Self {
         let mut stack: Vec<Vec<Self>> = vec!();
         let mut children: Vec<Self> = vec!();
+        let mut buffer = vec!();
 
         for c in s.chars() {
             match c {
@@ -43,15 +56,20 @@ impl ListTree {
                     children = vec!();
                 }
                 ']' => {
+                    Self::append_leaf(&mut children, &mut buffer);
                     let node = Self::Node(children.clone());
-                    if let Some(parent)= stack.pop() {
-                        children = parent;
-                        children.push(node);
+                    let parent = stack.pop().unwrap();
+                    if stack.is_empty() {
+                        return node; // We reached last closing brace
                     }
+                    children = parent;
+                    children.push(node);
                 }
-                ',' => { }
+                ',' => {
+                    Self::append_leaf(&mut children, &mut buffer);
+                }
                 _ => {
-                    children.push(Self::Leaf(c.to_digit(10).unwrap()))
+                    buffer.push(c);
                 }
             }
         }
@@ -59,9 +77,16 @@ impl ListTree {
         return Self::Node(children);
     }
 
+    fn append_leaf(children: &mut Vec<ListTree>, buffer: &mut Vec<char>) {
+        if !buffer.is_empty() {
+            children.push(Self::Leaf(buffer.iter().collect::<String>().parse::<u32>().unwrap()));
+            buffer.clear();
+        }
+    }
+
     fn print(&self) -> String {
         match self {
-            Self::Leaf(v) => { char::from_digit(*v, 10).unwrap().to_string() }
+            Self::Leaf(v) => { v.to_string() }
             Self::Node(children) => { format!("[{}]", children.into_iter().map(|c| c.print()).join(",")) }
         }
     }
@@ -146,5 +171,10 @@ mod day13_tests {
     #[test]
     fn is_ordered_works_8() {
         assert_eq!(false, is_ordered("[1,[2,[3,[4,[5,6,7]]]],8,9]", "[1,[2,[3,[4,[5,6,0]]]],8,9]"));
+    }
+
+    #[test]
+    fn is_ordered_works_9() {
+        assert_eq!(false, is_ordered("[22]", "[3]"));
     }
 }
