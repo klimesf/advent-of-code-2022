@@ -1,4 +1,6 @@
 use std::fs;
+use rayon::iter::IntoParallelIterator;
+use rayon::iter::ParallelIterator;
 use regex::{Match, Regex};
 
 pub(crate) fn day15() {
@@ -21,13 +23,11 @@ fn calculate_no_beacon_slow(signals: Vec<(i64, i64, i64, i64)>, y: i64) -> usize
     let sig: Vec<(i64, i64, i64)> = signals.iter()
         .map(|(xs, ys, xb, yb)| (*xs, *ys, manhattan_dist((*xs, *ys), (*xb, *yb))))
         .collect();
-    let mut ans = 0;
-    for x in -100000..=5000000 {
-        if sig.iter().any(|(xs_2, ys_2, dist_2)| manhattan_dist((*xs_2, *ys_2), (x, y)) <= *dist_2) {
-            ans += 1
-        }
-    }
-    ans - 1
+    return (-100000..=5000000).into_par_iter()
+        .filter(|x| sig.iter()
+            .any(|(xs_2, ys_2, dist_2)|
+                manhattan_dist((*xs_2, *ys_2), (*x, y)) <= *dist_2))
+        .count() - 1;
 }
 
 fn find_uncovered_coords(signals: Vec<(i64, i64, i64, i64)>, max: i64) -> (i64, i64) {
