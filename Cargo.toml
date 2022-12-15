@@ -6,7 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cached = "0.26.2"
-itertools = "0.10.2"
-priority-queue = "1.2.1"
+itertools = "0.10.5"
 regex = "1.5.4"
