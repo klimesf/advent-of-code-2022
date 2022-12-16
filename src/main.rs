@@ -1,6 +1,4 @@
-extern crate cached;
 extern crate itertools;
-extern crate priority_queue;
 extern crate regex;
 
 use crate::day01::day01;
@@ -18,6 +16,7 @@ use crate::day12::day12;
 use crate::day13::day13;
 use crate::day14::day14;
 use crate::day15::day15;
+use crate::day16::day16;
 
 mod io;
 mod day01;
@@ -35,6 +34,7 @@ mod day12;
 mod day13;
 mod day14;
 mod day15;
+mod day16;
 mod toolbox;
 
 fn main() {
@@ -87,4 +87,7 @@ fn main() {
 
     println!("--- day15:");
     day15();
+
+    println!("--- day16:");
+    day16();
 }
