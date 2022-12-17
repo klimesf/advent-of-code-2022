@@ -18,7 +18,7 @@ pub(crate) fn day16() {
         adjacency_list.insert(from, neighbors);
     }
 
-    let mut adjacency_list_with_time: HashMap<&str, HashMap<&str, i32>> = HashMap::new();
+    let mut distances: HashMap<&str, HashMap<&str, i32>> = HashMap::new();
     for from in adjacency_list.keys() {
         let mut distance_map = HashMap::new();
         let mut stack = VecDeque::new();
@@ -35,77 +35,57 @@ pub(crate) fn day16() {
             adjacency_list.get(valve).unwrap().iter()
                 .for_each(|neighbor| stack.push_back((neighbor, time + 1)))
         }
-        adjacency_list_with_time.insert(from, distance_map);
+        distances.insert(from, distance_map);
     }
 
-    let pressured_valves: Vec<&str> = pressures.iter()
+    let valves_with_pressure: Vec<&str> = pressures.iter()
         .filter(|(_, pressure)| **pressure > 0)
         .map(|(valve, _)| *valve)
         .collect();
 
-    part_a(pressures.clone(), adjacency_list_with_time.clone(), pressured_valves.clone());
-    part_b(pressures.clone(), adjacency_list_with_time.clone(), pressured_valves.clone());
+    // Part 1
+    let (max, _) = solve(&pressures, &distances, valves_with_pressure.clone(), 30);
+    println!("{}", max);
+
+    // Part 2 - this does not work for test input because it's too greedy, but it works for my input
+    let (max, remaining) = solve(&pressures, &distances, valves_with_pressure, 26);
+    let (max_elephant, _) = solve(&pressures, &distances, remaining, 26);
+    println!("{}", max + max_elephant);
 }
 
-fn part_a(
-    pressures: HashMap<&str, i32>,
-    adjacency_list_with_time: HashMap<&str, HashMap<&str, i32>>,
-    pressured_valves: Vec<&str>
-) {
+fn solve<'a>(
+    pressures: &HashMap<&str, i32>,
+    distances: &HashMap<&str, HashMap<&str, i32>>,
+    remaining: Vec<&'a str>,
+    time: i32,
+) -> (i32, Vec<&'a str>) {
     let mut stack: Vec<(&str, Vec<&str>, i32, i32)> = vec!();
-    stack.push(("AA", vec!["AA"], 30, 0));
+    stack.push(("AA", remaining.clone(), time, 0));
 
     let mut max = i32::MIN;
+    let mut best_path = vec!();
     while !stack.is_empty() {
-        let (from, visited, time, total) = stack.pop().unwrap();
-        pressured_valves.iter()
-            .filter(|to| !visited.contains(to))
-            .for_each(|to| {
-                let dist = adjacency_list_with_time.get(from).unwrap().get(to).unwrap();
-                let mut new_visited = visited.clone();
-                new_visited.push(*to);
-                let next_time = time - dist - 1;
+        let (from, remaining, time, total) = stack.pop().unwrap();
+        if total > max {
+            max = total;
+            best_path = remaining.clone();
+        }
+        remaining.iter().for_each(|to| {
+            let dist = distances.get(from).unwrap().get(to).unwrap();
+            let mut new_remaining = remaining.clone();
+            new_remaining.retain(|x| x != to);
+            let next_time = time - dist - 1;
 
-                if next_time <= 0 || visited.len() > pressured_valves.len() {
-                    if total > max { max = total }
-                    return;
+            if next_time <= 0 {
+                if total > max {
+                    max = total;
+                    best_path = remaining.clone();
                 }
-                let pressure = pressures.get(to).unwrap();
-                stack.push((to, new_visited, next_time, total + (next_time * pressure)));
-            })
+                return;
+            }
+            let pressure = pressures.get(to).unwrap();
+            stack.push((to, new_remaining, next_time, total + (next_time * pressure)));
+        })
     }
-    println!("{}", max);
-}
-
-fn part_b(
-    pressures: HashMap<&str, i32>,
-    adjacency_list_with_time: HashMap<&str, HashMap<&str, i32>>,
-    pressured_valves: Vec<&str>
-) {
-    let mut stack: Vec<(&str, Vec<&str>, i32, i32, bool)> = vec!();
-    stack.push(("AA", vec!["AA"], 26, 0, false));
-    let mut max = i32::MIN;
-    while !stack.is_empty() {
-        let (from, visited, time, total, elephant) = stack.pop().unwrap();
-        pressured_valves.iter()
-            .filter(|to| !visited.contains(to))
-            .for_each(|to| {
-                let dist = adjacency_list_with_time.get(from).unwrap().get(to).unwrap();
-                let mut new_visited = visited.clone();
-                new_visited.push(*to);
-                let next_time = time - dist - 1;
-
-                if next_time <= 0 || visited.len() > pressured_valves.len() {
-                    if !elephant {
-                        stack.push(("AA", new_visited, 26, total, true));
-                        return;
-                    }
-                    if total > max { println!("{}", total); max = total }
-                    return;
-                }
-                let pressure = pressures.get(to).unwrap();
-                stack.push((to, new_visited, next_time, total + (next_time * pressure), elephant));
-            })
-    }
-    println!("{}", max);
+    (max, best_path)
 }
