@@ -1,6 +1,7 @@
 extern crate itertools;
 extern crate regex;
 
+use std::env;
 use crate::day01::day01;
 use crate::day02::day02;
 use crate::day03::day03;
@@ -40,58 +41,61 @@ mod day17;
 mod toolbox;
 
 fn main() {
-    println!();
-    println!("Advent of Code");
-    println!("        //2022");
-    println!();
+    let args: Vec<String> = env::args().collect();
+    if args.contains(&"all".to_string()) {
+        println!();
+        println!("Advent of Code");
+        println!("        //2022");
+        println!();
 
-    println!("--- day01:");
-    day01();
+        println!("--- day01:");
+        day01();
 
-    println!("--- day02:");
-    day02();
+        println!("--- day02:");
+        day02();
 
-    println!("--- day03:");
-    day03();
+        println!("--- day03:");
+        day03();
 
-    println!("--- day04:");
-    day04();
+        println!("--- day04:");
+        day04();
 
-    println!("--- day05:");
-    day05();
+        println!("--- day05:");
+        day05();
 
-    println!("--- day06:");
-    day06();
+        println!("--- day06:");
+        day06();
 
-    println!("--- day07:");
-    day07();
+        println!("--- day07:");
+        day07();
 
-    println!("--- day08:");
-    day08();
+        println!("--- day08:");
+        day08();
 
-    println!("--- day09:");
-    day09();
+        println!("--- day09:");
+        day09();
 
-    println!("--- day10:");
-    day10();
+        println!("--- day10:");
+        day10();
 
-    println!("--- day11:");
-    day11();
+        println!("--- day11:");
+        day11();
 
-    println!("--- day12:");
-    day12();
+        println!("--- day12:");
+        day12();
 
-    println!("--- day13:");
-    day13();
+        println!("--- day13:");
+        day13();
 
-    println!("--- day14:");
-    day14();
+        println!("--- day14:");
+        day14();
 
-    println!("--- day15:");
-    day15();
+        println!("--- day15:");
+        day15();
 
-    println!("--- day16:");
-    day16();
+        println!("--- day16:");
+        day16();
+    }
 
     println!("--- day17:");
     day17();
