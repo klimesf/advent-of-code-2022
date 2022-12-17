@@ -20,6 +20,7 @@ use crate::day14::day14;
 use crate::day15::day15;
 use crate::day16::day16;
 use crate::day17::day17;
+use crate::day18::day18;
 
 mod io;
 mod day01;
@@ -39,6 +40,7 @@ mod day14;
 mod day15;
 mod day16;
 mod day17;
+mod day18;
 mod toolbox;
 
 macro_rules! measure {
@@ -104,8 +106,11 @@ fn main() {
 
         println!("{}", format!("--- day16:").underline().green());
         measure!(day16());
+
+        println!("{}", format!("--- day17:").underline().green());
+        measure!(day17());
     }
 
-    println!("{}", format!("--- day17:").underline().green());
-    measure!(day17());
+    println!("{}", format!("--- day18:").underline().green());
+    measure!(day18());
 }
