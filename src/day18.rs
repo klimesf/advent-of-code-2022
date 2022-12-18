@@ -1,7 +1,5 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashSet, VecDeque};
 use std::fs;
-use rayon::iter::IntoParallelRefIterator;
-use rayon::iter::ParallelIterator;
 
 pub(crate) fn day18() {
     let input = fs::read_to_string("input/day18/input.txt").unwrap();
@@ -23,16 +21,12 @@ pub(crate) fn day18() {
         (0, 0, 1), // Forth
     );
 
-    let mut possible_air_gaps: HashMap<(i32, i32, i32), usize> = HashMap::new();
-    let ans: usize = droplets.iter()
+    let ans_a: usize = droplets.iter()
         .map(|(x, y, z)| {
-            dirs.iter().filter(|(dx, dy, dz)| {
-                *possible_air_gaps.entry((x + dx, y + dy, z + dz)).or_insert(0) += 1;
-                !droplets.contains(&(x + dx, y + dy, z + dz))
-            }).count()
+            dirs.iter().filter(|(dx, dy, dz)| !droplets.contains(&(x + dx, y + dy, z + dz))).count()
         })
         .sum();
-    println!("{}", ans);
+    println!("{}", ans_a);
 
     let max_x = *droplets.iter().map(|(x, _, _)| x).max().unwrap();
     let max_y = *droplets.iter().map(|(_, y, _)| y).max().unwrap();
@@ -41,37 +35,26 @@ pub(crate) fn day18() {
     let min_y = *droplets.iter().map(|(_, y, _)| y).min().unwrap();
     let min_z = *droplets.iter().map(|(_, _, z)| z).min().unwrap();
 
-    let air_gaps: Vec<(i32, i32, i32, usize)> = possible_air_gaps.iter()
-        .filter(|((x, y, z), _)|
-            !droplets.contains(&(*x, *y, *z))
-                && min_x < *x && *x < max_x
-                && min_y < *y && *y < max_y
-                && min_z < *z && *z < max_z
-        )
-        .map(|((x, y, z), ctr)| (*x, *y, *z, *ctr))
-        .collect();
+    let mut deque = VecDeque::new();
+    let mut reachable = HashSet::new();
+    deque.push_back((min_x - 1, min_y - 1, min_z - 1));
+    while !deque.is_empty() {
+        let (x, y, z) = deque.pop_front().unwrap();
+        if reachable.contains(&(x, y, z))
+            || droplets.contains(&(x, y, z))
+            || x < min_x - 1 || x > max_x + 1
+            || y < min_y - 1 || y > max_y + 1
+            || z < min_z - 1 || z > max_z + 1 {
+            continue;
+        }
+        reachable.insert((x, y, z));
+        dirs.iter().for_each(|(dx, dy, dz)| { deque.push_back((x + dx, y + dy, z + dz)); });
+    }
 
-    let closed = air_gaps.par_iter()
-        .filter(|air_gap| {
-            let mut stack = vec!();
-            let mut visited = HashSet::new();
-            stack.push((air_gap.0, air_gap.1, air_gap.2));
-
-            // Run DFS from each air gap and see if we can reach outer bounds
-            while !stack.is_empty() {
-                let (x, y, z) = stack.pop().unwrap();
-                if x <= min_x || x >= max_x
-                    || y <= min_y || y >= max_y
-                    || z <= min_z || z >= max_z {
-                    return false;
-                }
-                if visited.contains(&(x, y, z)) || droplets.contains(&(x, y, z)) { continue; }
-                visited.insert((x, y, z));
-                dirs.iter().for_each(|(dx, dy, dz)| { stack.push((x + dx, y + dy, z + dz)); });
-            }
-            return true;
+    let ans_b: usize = droplets.iter()
+        .map(|(x, y, z)| {
+            dirs.iter().filter(|(dx, dy, dz)| reachable.contains(&(x + dx, y + dy, z + dz))).count()
         })
-        .map(|(_, _, _, ctr)| ctr)
-        .sum::<usize>();
-    println!("{}", ans - closed);
+        .sum();
+    println!("{}", ans_b);
 }
