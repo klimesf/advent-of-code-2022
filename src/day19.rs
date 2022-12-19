@@ -21,17 +21,17 @@ pub(crate) fn day19() {
 
     let ans = blueprints.par_iter()
         .map(|(id, ore_cost, clay_cost, obsidian_cost, geode_cost)|
-            part_a(*id, *ore_cost, *clay_cost, *obsidian_cost, *geode_cost) * id)
+            part_a(*ore_cost, *clay_cost, *obsidian_cost, *geode_cost) * id)
         .sum::<i32>();
     println!("{}", ans);
 
-    // let ans = blueprints.iter()
-    //     .take(3)
-    //     .par_bridge()
-    //     .map(|(id, ore_cost, clay_cost, obsidian_cost, geode_cost)|
-    //         part_b(*id, *ore_cost, *clay_cost, *obsidian_cost, *geode_cost))
-    //     .product::<i32>();
-    // println!("{}", ans);
+    let ans = blueprints.iter()
+        .take(3)
+        .par_bridge()
+        .map(|(id, ore_cost, clay_cost, obsidian_cost, geode_cost)|
+            part_b(*id, *ore_cost, *clay_cost, *obsidian_cost, *geode_cost))
+        .product::<i32>();
+    println!("{}", ans);
 }
 
 fn parse_i32(g: Option<Match>) -> i32 {
@@ -41,10 +41,12 @@ fn parse_i32(g: Option<Match>) -> i32 {
 type Cost = (i32, i32, i32);
 
 #[allow(dead_code)]
-fn part_a(id: i32, ore_cost: Cost, clay_cost: Cost, obsidian_cost: Cost, geode_cost: Cost) -> i32 {
+fn part_a(ore_cost: Cost, clay_cost: Cost, obsidian_cost: Cost, geode_cost: Cost) -> i32 {
     let robot_ctr = [1, 0, 0, 0];
     let resource_ctr = [0; 4];
     let robot_factory = [0, 0, 0, 0];
+    let max_ore_cost = vec!(ore_cost.0, clay_cost.0, obsidian_cost.0, geode_cost.0).into_iter().max().unwrap();
+    let max_clay_cost = vec!(ore_cost.1, clay_cost.1, obsidian_cost.1, geode_cost.1).into_iter().max().unwrap();
     let mut states = vec!();
     states.push((0, robot_ctr.clone(), resource_ctr.clone(), robot_factory.clone()));
 
@@ -78,14 +80,14 @@ fn part_a(id: i32, ore_cost: Cost, clay_cost: Cost, obsidian_cost: Cost, geode_c
         }
 
         states.push((minute + 1, robot_ctr.clone(), resource_ctr.clone(), [0, 0, 0, 0]));
-        if minute < 12 && ore_cost.0 <= available_res[0] && ore_cost.1 <= available_res[1] && ore_cost.2 <= available_res[2] {
+        if robot_ctr[0] < max_ore_cost && ore_cost.0 <= available_res[0] && ore_cost.1 <= available_res[1] && ore_cost.2 <= available_res[2] {
             let mut res_clone = resource_ctr.clone();
             res_clone[0] -= ore_cost.0;
             res_clone[1] -= ore_cost.1;
             res_clone[2] -= ore_cost.2;
             states.push((minute + 1, robot_ctr.clone(), res_clone, [1, 0, 0, 0]));
         }
-        if minute < 20 && clay_cost.0 <= available_res[0] && clay_cost.1 <= available_res[1] && clay_cost.2 <= available_res[2] {
+        if robot_ctr[1] < max_clay_cost && clay_cost.0 <= available_res[0] && clay_cost.1 <= available_res[1] && clay_cost.2 <= available_res[2] {
             let mut res_clone = resource_ctr.clone();
             res_clone[0] -= clay_cost.0;
             res_clone[1] -= clay_cost.1;
@@ -108,6 +110,8 @@ fn part_b(id: i32, ore_cost: Cost, clay_cost: Cost, obsidian_cost: Cost, geode_c
     let robot_ctr = [1, 0, 0, 0];
     let resource_ctr = [0; 4];
     let robot_factory = [0, 0, 0, 0];
+    let max_ore_cost = vec!(ore_cost.0, clay_cost.0, obsidian_cost.0, geode_cost.0).into_iter().max().unwrap();
+    let max_clay_cost = vec!(ore_cost.1, clay_cost.1, obsidian_cost.1, geode_cost.1).into_iter().max().unwrap();
     let mut states = vec!();
     states.push((0, robot_ctr.clone(), resource_ctr.clone(), robot_factory.clone()));
 
@@ -143,14 +147,14 @@ fn part_b(id: i32, ore_cost: Cost, clay_cost: Cost, obsidian_cost: Cost, geode_c
         }
 
         states.push((minute + 1, robot_ctr.clone(), resource_ctr.clone(), [0, 0, 0, 0]));
-        if ore_cost.0 <= available_res[0] && ore_cost.1 <= available_res[1] && ore_cost.2 <= available_res[2] {
+        if robot_ctr[0] < max_ore_cost && ore_cost.0 <= available_res[0] && ore_cost.1 <= available_res[1] && ore_cost.2 <= available_res[2] {
             let mut res_clone = resource_ctr.clone();
             res_clone[0] -= ore_cost.0;
             res_clone[1] -= ore_cost.1;
             res_clone[2] -= ore_cost.2;
             states.push((minute + 1, robot_ctr.clone(), res_clone, [1, 0, 0, 0]));
         }
-        if clay_cost.0 <= available_res[0] && clay_cost.1 <= available_res[1] && clay_cost.2 <= available_res[2] {
+        if robot_ctr[1] < max_clay_cost && clay_cost.0 <= available_res[0] && clay_cost.1 <= available_res[1] && clay_cost.2 <= available_res[2] {
             let mut res_clone = resource_ctr.clone();
             res_clone[0] -= clay_cost.0;
             res_clone[1] -= clay_cost.1;
