@@ -43,3 +43,12 @@ pub(crate) fn lcm_64(a: i64, b: i64) -> i64 {
         (a * b) / gcd_64(b, a)
     }
 }
+
+#[macro_export]
+macro_rules! hashmap {
+    ($( $key: expr => $val: expr ),*) => {{
+         let mut map = ::std::collections::HashMap::new();
+         $( map.insert($key, $val); )*
+         map
+    }}
+}
