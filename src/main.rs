@@ -134,8 +134,11 @@ fn main() {
 
         println!("{}", format!("--- day22:").underline().green());
         measure!(day22());
+
+        println!("{}", format!("--- day23:").underline().green());
+        measure!(day23());
     }
 
-    println!("{}", format!("--- day23:").underline().green());
-    measure!(day23());
+    println!("{}", format!("--- day24:").underline().green());
+    measure!(day24());
 }
