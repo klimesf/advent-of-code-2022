@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::collections::{BinaryHeap, HashSet};
+use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::fs;
 
 pub(crate) fn day24() {
@@ -17,6 +17,16 @@ pub(crate) fn day24() {
         }
     }
 
+    let mut blizzards_per_row: HashMap<i32, Vec<(i32, i32, char)>> = HashMap::new();
+    blizzards.iter()
+        .filter(|(_, _, c)| *c == '<' || *c == '>')
+        .for_each(|blizzard| blizzards_per_row.entry(blizzard.0).or_insert(vec!()).push(*blizzard));
+
+    let mut blizzards_per_col: HashMap<i32, Vec<(i32, i32, char)>> = HashMap::new();
+    blizzards.iter()
+        .filter(|(_, _, c)| *c == '^' || *c == 'v')
+        .for_each(|blizzard| blizzards_per_col.entry(blizzard.1).or_insert(vec!()).push(*blizzard));
+
     let start_y = map[0].iter().enumerate()
         .filter(|(_, c)| **c == '.')
         .map(|(i, _)| i)
@@ -26,15 +36,18 @@ pub(crate) fn day24() {
         .map(|(i, _)| i)
         .max().unwrap() as i32;
 
-    let min_1 = find_shortest(&map, x_max, y_max, &blizzards, (0, start_y), (x_max + 1, end_y), 0);
+    let min_1 = find_shortest(&map, x_max, y_max, &blizzards_per_row, &blizzards_per_col, (0, start_y), (x_max + 1, end_y), 0);
     println!("{}", min_1);
 
-    let min_2 = find_shortest(&map, x_max, y_max, &blizzards, (x_max + 1, end_y), (0, start_y), min_1);
-    let min_3 = find_shortest(&map, x_max, y_max, &blizzards, (0, start_y), (x_max + 1, end_y), min_2);
+    let min_2 = find_shortest(&map, x_max, y_max, &blizzards_per_row, &blizzards_per_col, (x_max + 1, end_y), (0, start_y), min_1);
+    let min_3 = find_shortest(&map, x_max, y_max, &blizzards_per_row, &blizzards_per_col, (0, start_y), (x_max + 1, end_y), min_2);
     println!("{}", min_3);
 }
 
-fn find_shortest(map: &Vec<Vec<char>>, x_max: i32, y_max: i32, blizzards: &HashSet<(i32, i32, char)>, start: (i32, i32), end: (i32, i32), start_time: i32) -> i32 {
+fn find_shortest(map: &Vec<Vec<char>>, x_max: i32, y_max: i32,
+                 blizzards_per_row: &HashMap<i32, Vec<(i32, i32, char)>>,
+                 blizzards_per_col: &HashMap<i32, Vec<(i32, i32, char)>>,
+                 start: (i32, i32), end: (i32, i32), start_time: i32) -> i32 {
     let dirs = [(0, 0), (0, 1), (0, -1), (1, 0), (-1, 0)];
 
     let mut prio_queue = BinaryHeap::new();
@@ -52,7 +65,12 @@ fn find_shortest(map: &Vec<Vec<char>>, x_max: i32, y_max: i32, blizzards: &HashS
             break; // Due to BFS nature, the first end reached will also be the minimal, so we can terminate
         }
         dirs.iter()
-            .filter(|(dx, dy)| blizzards.iter()
+            .filter(|(dx, dy)| blizzards_per_row.get(&(pos.x + dx)).unwrap_or(&vec!()).iter()
+                .all(|(bx, by, dir)| {
+                    let new_blizzard = calc_new_blizzard(x_max, y_max, pos.time, bx, by, dir);
+                    new_blizzard != (pos.x + *dx, pos.y + *dy)
+                }))
+            .filter(|(dx, dy)| blizzards_per_col.get(&(pos.y + dy)).unwrap_or(&vec!()).iter()
                 .all(|(bx, by, dir)| {
                     let new_blizzard = calc_new_blizzard(x_max, y_max, pos.time, bx, by, dir);
                     new_blizzard != (pos.x + *dx, pos.y + *dy)
