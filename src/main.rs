@@ -26,6 +26,7 @@ use crate::day20::day20;
 use crate::day21::day21;
 use crate::day22::day22;
 use crate::day23::day23;
+use crate::day24::day24;
 
 mod io;
 mod day01;
@@ -51,6 +52,7 @@ mod day20;
 mod day21;
 mod day22;
 mod day23;
+mod day24;
 mod toolbox;
 
 macro_rules! measure {
