@@ -1,9 +1,12 @@
-use std::collections::{HashMap, HashSet};
-use std::fs;
+use std::collections::{HashSet};
+use std::{fs, mem};
 
 pub(crate) fn day23() {
     let input = fs::read_to_string("input/day23/input.txt").unwrap();
     let mut map = HashSet::new();
+    let mut new_map = HashSet::new();
+    map.reserve(input.len());
+    new_map.reserve(input.len());
     input.lines().enumerate().for_each(|(x, line)| line.chars().enumerate()
         .for_each(|(y, c)| {
             match c {
@@ -22,41 +25,41 @@ pub(crate) fn day23() {
     let mut i = 0;
     loop {
         let mut move_ctr = 0;
-        let mut proposed_dest: HashMap<(i32, i32), (i32, i32)> = HashMap::new();
-        let mut proposed_dest_ctr: HashMap<(i32, i32), i32> = HashMap::new();
-        let mut new_map = HashSet::new();
+        new_map.clear();
+
         'outer: for elf in &map {
-            if all_dirs.iter().all(|(dx, dy)| !map.contains(&(elf.0 + dx, elf.1 + dy))) {
-                new_map.insert(*elf);
-                continue;
-            }
-            for j in i..i+4 {
-                let (dirs, mv) = ordnung[j % 4];
-                if dirs.iter().all(|(dx, dy)| !map.contains(&(elf.0 + dx, elf.1 + dy))) {
-                    proposed_dest.insert(*elf, (elf.0 + mv.0, elf.1 + mv.1));
-                    *proposed_dest_ctr.entry((elf.0 + mv.0, elf.1 + mv.1)).or_insert(0) += 1;
-                    continue 'outer;
+            if all_dirs.iter().any(|(dx, dy)| map.contains(&(elf.0 + dx, elf.1 + dy))) {
+                for j in i..i + 4 {
+                    let (dirs, mv) = ordnung[j % 4];
+                    if dirs.iter().all(|(dx, dy)| !map.contains(&(elf.0 + dx, elf.1 + dy))) {
+                        let new_pos = (elf.0 + mv.0, elf.1 + mv.1);
+                        if new_map.contains(&(new_pos)) {
+                            // There is another elf in the position, so we cannot move there
+                            // He must have come from the opposite direction, so push him back
+                            // Note: we can disregard the proposed directions, because only collision can happen
+                            //       from the opposite direction by single elf
+                            move_ctr -= 1;
+                            new_map.remove(&new_pos);
+                            new_map.insert((new_pos.0 + mv.0, new_pos.1 + mv.1));
+                            new_map.insert(*elf);
+                        } else {
+                            move_ctr += 1;
+                            new_map.insert(new_pos);
+                        }
+                        continue 'outer;
+                    }
                 }
             }
             new_map.insert(*elf);
         }
 
-        proposed_dest.iter().for_each(|(elf, dest)| {
-            if *proposed_dest_ctr.get(dest).unwrap() <= 1 {
-                new_map.insert(*dest);
-                move_ctr += 1;
-            } else {
-                new_map.insert(*elf);
-            }
-        });
-        map = new_map;
-
-        if i == 9 {
-            get_empty_space(&map);
-        }
+        mem::swap(&mut map, &mut new_map);
 
         i += 1;
-        if move_ctr == 0 {
+        if i == 10 { // Part 1
+            get_empty_space(&map);
+        }
+        if move_ctr == 0 { // Part 2
             println!("{}", i);
             break;
         }
